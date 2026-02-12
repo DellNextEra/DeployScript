@@ -49,3 +49,460 @@
 
 <main>
   <section class="card">
+    <h2>1) Configuration</h2>
+    <div class="content">
+      <div class="warning">
+        <strong>Admin required:</strong> Most actions here require running the generated script in an elevated PowerShell session.
+      </div>
+
+      <p class="section-title">Network</p>
+      <div class="grid2">
+        <label>Interface alias (static IP target)
+          <input id="ifaceAlias" type="text" value="Integrated NIC 1 Port 1-1" />
+        </label>
+        <label>Static IPv4 address
+          <input id="ipAddress" type="text" value="10.184.69.101" />
+          <small id="err-ipAddress" class="err-msg"></small>
+        </label>
+        <label>Default gateway
+          <input id="gateway" type="text" value="10.184.69.1" />
+          <small id="err-gateway" class="err-msg"></small>
+        </label>
+        <label>Prefix length (CIDR)
+          <input id="prefix" type="text" value="24" />
+          <small id="err-prefix" class="err-msg"></small>
+        </label>
+        <label>VLAN ID (applied to adapters named <code>Integrated*</code>)
+          <input id="vlanId" type="text" value="900" />
+          <small id="err-vlanId" class="err-msg"></small>
+        </label>
+        <label>DNS servers (comma‑separated IPv4)
+          <input id="dnsServers" type="text" value="10.110.30.216,10.110.93.254" />
+          <small id="err-dnsServers" class="err-msg"></small>
+        </label>
+      </div>
+
+      <div class="row">
+        <label class="checkbox"><input id="toggleDhcpOff" type="checkbox" checked /> Disable DHCP on adapters whose description does <em>not</em> match “NDIS”</label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleDisableDisconnected" type="checkbox" checked /> Disable disconnected adapters</label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleSetStatic" type="checkbox" checked /> Set static IPv4 on the specified interface</label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleVlan" type="checkbox" checked /> Set VLAN ID on <code>Integrated*</code> adapters</label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleDns" type="checkbox" checked /> Set DNS servers on the specified interface</label>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="section-title">Remote Access & Firewall</p>
+      <div class="row">
+        <label class="checkbox"><input id="toggleRdp" type="checkbox" checked /> Enable RDP (registry + firewall group “Remote Desktop”)</label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="togglePing" type="checkbox" checked /> Allow inbound ICMPv4 echo (ping)</label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleWinRM" type="checkbox" checked /> <code>winrm quickconfig</code></label>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="section-title">Cluster Service Registry (optional)</p>
+      <div class="row">
+        <label class="checkbox"><input id="toggleClusSvc" type="checkbox" checked /> Create clussvc keys + <code>ExcludeAdaptersByDescription</code> (“Remote NDIS Compatible Device”)</label>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="section-title">Time / NTP</p>
+      <div class="grid2">
+        <label>NTP peers (comma‑separated IPv4)
+          <input id="ntpPeers" type="text" value="10.110.30.156,10.110.90.223" />
+          <small id="err-ntpPeers" class="err-msg"></small>
+        </label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleNtp" type="checkbox" checked /> Configure W32Time with peers</label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleNtpStatus" type="checkbox" checked /> Query W32Time status</label>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="section-title">Computer Name</p>
+      <div class="grid2">
+        <label>New computer name
+          <input id="newComputerName" type="text" value="USMOSD8E1ASHH01" />
+        </label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleRename" type="checkbox" checked /> Rename computer</label>
+        <label class="checkbox"><input id="toggleRestart" type="checkbox" checked /> Restart after rename</label>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="section-title">Proxy & WinInetProxy module</p>
+      <div class="grid2">
+        <label>Proxy server URL
+          <input id="proxyServer" type="text" value="http://pzen.fpl.com:10262" />
+        </label>
+        <label>Proxy bypass list (comma‑separated)
+          <input id="proxyBypass" type="text" value="localhost,127.0.0.1,*.fpl.com,10.*.*.*,172.16.*.*,192.168.*.*,169.254.*.*,ADD_SITE-SUBNET,HOSTNAME1,HOSTNAME2,CLUSTERNAME" />
+        </label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleDownloadModule" type="checkbox" checked /> Download & import WinInetProxy module</label>
+        <label class="checkbox"><input id="toggleSetProxy" type="checkbox" checked /> Set WinINet & WinHTTP proxy</label>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="section-title">Azure Stack HCI Arc Initialization</p>
+      <div class="grid2">
+        <label>Tenant ID
+          <input id="tenantId" type="text" value="a1681294-4857-4624-8d04-edaddb44ee26" />
+        </label>
+        <label>Subscription ID
+          <input id="subscriptionId" type="text" value="85a51444-f74a-4b48-9312-bf884d60394d" />
+        </label>
+        <label>Resource Group
+          <input id="resourceGroup" type="text" value="z-jb630-ashedge-prod-eastus-rg-sd8" />
+        </label>
+        <label>Region
+          <input id="region" type="text" value="eastus" />
+        </label>
+      </div>
+      <div class="row">
+        <label class="checkbox"><input id="toggleArcInit" type="checkbox" checked /> Invoke AzStack HCI Arc Initialization</label>
+        <label class="checkbox"><input id="toggleArcUseProxy" type="checkbox" checked /> Include proxy args in Arc init</label>
+      </div>
+
+      <div id="formAlert" class="form-alert">Fix the highlighted fields to enable Copy/Download.</div>
+
+      <div class="btnbar" style="margin-top:0.75rem">
+        <button class="primary" id="btnPreview">Preview</button>
+        <button id="btnCopy" disabled>Copy</button>
+        <button class="good" id="btnDownload" disabled>Download .ps1</button>
+      </div>
+      <p class="hint">Tip: Validate interface alias and IPs for your hardware before running.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2) Preview</h2>
+    <div class="content">
+      <pre id="preview"></pre>
+    </div>
+  </section>
+</main>
+
+<script>
+  // --- Utilities ---
+  const CRLF = s => s.replace(/\r?\n/g, "\r\n");
+  const psq = s => `'${String(s ?? "").replace(/'/g, "''")}'`; // single-quote safe
+  const csv = s => String(s || "").split(",").map(x => x.trim()).filter(Boolean);
+
+  const g = id => document.getElementById(id);
+  const val = id => g(id).value.trim();
+  const on = id => g(id).checked;
+
+  function lines(arr){ return arr.filter(l => l !== null && l !== undefined).join("\n"); }
+
+  // --- IPv4 Validation helpers ---
+  const ipv4Re = /^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)$/;
+  const isIPv4 = s => ipv4Re.test(s);
+
+  function setError(id, msg) {
+    g(id).classList.add('error');
+    const e = g('err-' + id);
+    if (e) e.textContent = msg || '';
+  }
+  function clearError(id) {
+    g(id).classList.remove('error');
+    const e = g('err-' + id);
+    if (e) e.textContent = '';
+  }
+
+  function validateIPv4Field(id, required = true) {
+    const v = val(id);
+    if (!v && !required) { clearError(id); return true; }
+    if (!v) { setError(id, 'Required'); return false; }
+    if (!isIPv4(v)) { setError(id, 'Enter a valid IPv4 address (e.g., 10.0.0.1)'); return false; }
+    clearError(id); return true;
+  }
+
+  function validateIPv4CsvField(id, required = true) {
+    const text = val(id);
+    const items = csv(text);
+    if (items.length === 0) {
+      if (required) { setError(id, 'Provide at least one IPv4 address'); return false; }
+      clearError(id); return true;
+    }
+    const bad = items.filter(x => !isIPv4(x));
+    if (bad.length) {
+      setError(id, 'Invalid IPv4: ' + bad.join(', '));
+      return false;
+    }
+    clearError(id); return true;
+  }
+
+  function validateNumberInRange(id, min, max, required = true) {
+    const v = val(id);
+    if (!v && !required) { clearError(id); return true; }
+    if (!/^\d+$/.test(v)) { setError(id, `Enter a number ${min}-${max}`); return false; }
+    const n = Number(v);
+    if (n < min || n > max) { setError(id, `Enter a number ${min}-${max}`); return false; }
+    clearError(id); return true;
+  }
+
+  function validateAll() {
+    let ok = true;
+
+    // Conditional checks based on toggles
+    if (on('toggleSetStatic')) {
+      ok = validateIPv4Field('ipAddress', true) && ok;
+      ok = validateIPv4Field('gateway', true) && ok;
+      ok = validateNumberInRange('prefix', 0, 32, true) && ok;
+    } else {
+      clearError('ipAddress'); clearError('gateway'); clearError('prefix');
+    }
+
+    // VLAN is independent but often used; keep it valid if toggled
+    if (on('toggleVlan')) {
+      ok = validateNumberInRange('vlanId', 1, 4094, true) && ok;
+    } else {
+      clearError('vlanId');
+    }
+
+    if (on('toggleDns')) {
+      ok = validateIPv4CsvField('dnsServers', true) && ok;
+    } else {
+      clearError('dnsServers');
+    }
+
+    if (on('toggleNtp')) {
+      // Per request: enforce IPv4 for NTP peers
+      ok = validateIPv4CsvField('ntpPeers', true) && ok;
+    } else {
+      clearError('ntpPeers');
+    }
+
+    // Show/hide form alert
+    g('formAlert').classList.toggle('show', !ok);
+
+    // Buttons state
+    g('btnCopy').disabled = !ok;
+    g('btnDownload').disabled = !ok;
+
+    return ok;
+  }
+
+  function buildScript() {
+    // Gather values
+    const ifaceAlias = val("ifaceAlias");
+    const ip = val("ipAddress");
+    const gw = val("gateway");
+    const prefix = val("prefix");
+    const vlanId = val("vlanId");
+    const dnsList = csv(val("dnsServers"));
+
+    const ntpPeers = csv(val("ntpPeers"));
+    const newName = val("newComputerName");
+
+    const proxy = val("proxyServer");
+    const bypass = val("proxyBypass");
+
+    const tenant = val("tenantId");
+    const sub = val("subscriptionId");
+    const rg = val("resourceGroup");
+    const region = val("region");
+
+    // Toggles
+    const tgDhcpOff = on("toggleDhcpOff");
+    const tgDisableDisc = on("toggleDisableDisconnected");
+    const tgSetStatic = on("toggleSetStatic");
+    const tgVlan = on("toggleVlan");
+    const tgDns = on("toggleDns");
+
+    const tgRdp = on("toggleRdp");
+    const tgPing = on("togglePing");
+    const tgWinRM = on("toggleWinRM");
+
+    const tgClusSvc = on("toggleClusSvc");
+
+    const tgNtp = on("toggleNtp");
+    const tgNtpStatus = on("toggleNtpStatus");
+
+    const tgRename = on("toggleRename");
+    const tgRestart = on("toggleRestart");
+
+    const tgDownloadModule = on("toggleDownloadModule");
+    const tgSetProxy = on("toggleSetProxy");
+
+    const tgArcInit = on("toggleArcInit");
+    const tgArcUseProxy = on("toggleArcUseProxy");
+
+    // Header
+    const header = [
+      "# ================================================",
+      "# Generated Windows Host Bootstrap Script",
+      `# Generated: ${new Date().toISOString()}`,
+      "# ================================================",
+      "$ErrorActionPreference = 'Stop'",
+      "Set-StrictMode -Version Latest",
+      ""
+    ];
+
+    // Network configuration
+    const net = [];
+    if (tgDhcpOff) {
+      net.push(`Get-NetAdapter | ? InterfaceDescription -inotmatch "NDIS" | Set-NetIPInterface -Dhcp Disabled`);
+    }
+    if (tgDisableDisc) {
+      net.push(`Get-NetAdapter | Where-Object { $_.status -eq "disconnected" } | Disable-NetAdapter -Confirm:$false`);
+    }
+    if (tgSetStatic) {
+      net.push(
+        `New-NetIPAddress -InterfaceAlias ${psq(ifaceAlias)} -IPAddress ${psq(ip)} -DefaultGateway ${psq(gw)} -PrefixLength ${psq(prefix)} -AddressFamily IPv4 -Verbose`
+      );
+    }
+    if (tgVlan) {
+      net.push(`Get-NetAdapter -Name Integrated* | Set-NetAdapter -VlanID ${psq(vlanId)} -Confirm:$false`);
+    }
+    if (tgDns) {
+      net.push(`Set-DnsClientServerAddress -InterfaceAlias ${psq(ifaceAlias)} -ServerAddresses ${dnsList.join(",")}`);
+    }
+
+    // RDP / Firewall / WinRM
+    const access = [];
+    if (tgRdp) {
+      access.push(
+        `Set-ItemProperty -Path "HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server" -Name "fDenyTSConnections" -Value 0`,
+        `Enable-NetFirewallRule -DisplayGroup "Remote Desktop"`
+      );
+    }
+    if (tgClusSvc) {
+      access.push(
+        `New-Item -Path HKLM:\\system\\currentcontrolset\\services\\clussvc -ErrorAction SilentlyContinue | Out-Null`,
+        `New-Item -Path HKLM:\\system\\currentcontrolset\\services\\clussvc\\parameters -ErrorAction SilentlyContinue | Out-Null`,
+        `New-ItemProperty -Path HKLM:\\system\\currentcontrolset\\services\\clussvc\\parameters -Name ExcludeAdaptersByDescription -Value "Remote NDIS Compatible Device" -ErrorAction SilentlyContinue | Out-Null`
+      );
+    }
+    if (tgWinRM) {
+      access.push(`winrm quickconfig`);
+    }
+    if (tgPing) {
+      access.push(`netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow`);
+    }
+
+    // Time / NTP
+    const time = [];
+    if (tgNtp && ntpPeers.length) {
+      const peersLit = ntpPeers.join(",");
+      time.push(`w32tm /config /manualpeerlist:${psq(peersLit)} /syncfromflags:manual /update`);
+    }
+    if (tgNtpStatus) {
+      time.push(`w32tm /query /status`);
+    }
+
+    // Rename
+    const rename = [];
+    if (tgRename && newName) {
+      rename.push(`Rename-Computer -NewName ${psq(newName)}${tgRestart ? " -Restart" : ""}`);
+    }
+
+    // Proxy & module
+    const proxyBlock = [];
+    if (tgDownloadModule) {
+      const modUrl = `https://www.powershellgallery.com/api/v2/package/WinInetProxy/0.1.0`;
+      const proxyArg = proxy ? ` -Proxy ${psq(proxy)}` : "";
+      proxyBlock.push(
+        `Invoke-WebRequest -Uri ${psq(modUrl)} -OutFile C:\\WinInetProxy.zip${proxyArg}`,
+        `Expand-Archive -Path C:\\WinInetProxy.zip -DestinationPath C:\\wininetproxy\\ -Force`,
+        `Import-Module -Name C:\\wininetproxy\\WinInetProxy.psm1`
+      );
+    }
+    if (tgSetProxy && proxy) {
+      proxyBlock.push(
+        `$ProxyBypassList = ${psq(bypass)}`,
+        `$proxyserver = ${psq(proxy)}`,
+        `Set-WinInetProxy -ProxySettingsPerUser 0 -ProxyServer $proxyserver -ProxyBypass $ProxyBypassList`,
+        `Set-winhttpproxy -proxyserver $proxyserver -BypassList $ProxyBypassList`
+      );
+    }
+
+    // Azure Stack HCI Arc Initialization
+    const arc = [];
+    if (tgArcInit) {
+      let cmd = `Invoke-AzStackHciArcInitialization -TenantID ${psq(tenant)} -SubscriptionID ${psq(sub)} -ResourceGroup ${psq(rg)} -Region ${psq(region)} -Cloud "AzureCloud"`;
+      if (tgArcUseProxy && proxy) {
+        cmd += ` -Proxy ${psq(proxy)} -ProxyBypass ${psq(bypass)}`;
+      }
+      arc.push(cmd);
+    }
+
+    const parts = [
+      ...header,
+      ...(net.length ? ["# --- Network ---", ...net, ""] : []),
+      ...(access.length ? ["# --- Access & Firewall ---", ...access, ""] : []),
+      ...(time.length ? ["# --- Time / NTP ---", ...time, ""] : []),
+      ...(rename.length ? ["# --- Rename ---", ...rename, ""] : []),
+      ...(proxyBlock.length ? ["# --- Proxy & WinInetProxy Module ---", ...proxyBlock, ""] : []),
+      ...(arc.length ? ["# --- Azure Stack HCI Arc Initialization ---", ...arc, ""] : []),
+      `# Completed.`
+    ];
+
+    return lines(parts);
+  }
+
+  function updatePreview() {
+    const script = buildScript();
+    g('preview').textContent = script;
+    validateAll(); // sets buttons + inline messages
+  }
+
+  function downloadPs1() {
+    if (!validateAll()) return;
+    const content = CRLF(buildScript());
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "windows-bootstrap.ps1";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function copyToClipboard() {
+    if (!validateAll()) return;
+    await navigator.clipboard.writeText(buildScript());
+    const btn = g("btnCopy");
+    const prev = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = prev, 1200);
+  }
+
+  // Wire up
+  g('btnPreview').addEventListener('click', updatePreview);
+  g('btnDownload').addEventListener('click', downloadPs1);
+  g('btnCopy').addEventListener('click', copyToClipboard);
+
+  // Live validation on inputs and toggles
+  document.querySelectorAll('input').forEach(el => el.addEventListener('input', updatePreview));
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.addEventListener('change', updatePreview));
+
+  // Initial render
+  updatePreview();
+</script>
+</body>
+</html>
