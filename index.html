@@ -5,7 +5,7 @@
   <title>Windows Host Bootstrap PowerShell Script Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --bg:#0f172a; --fg:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; --panel:#0b1020; --border:#1f2937; --good:#22c55e; --warn:#f59e0b; --err:#ef4444; }
+    :root { --bg:#0f172a; --fg:#e5e7eb; --muted:#94a3b8; --accent:#38bdf8; --panel:#0b1020; --border:#1f2937; --good:#22c55e; --warn:#f59e0b; }
     * { box-sizing: border-box; }
     body { margin:0; font-family:system-ui, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--fg); }
     header { padding:1rem 1.25rem; background:#111827; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:1; }
@@ -20,7 +20,6 @@
     input[type="text"], input[type="password"], select, textarea {
       width:100%; background:#0a1222; color:var(--fg); border:1px solid var(--border);
       border-radius:8px; padding:0.6rem 0.7rem; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      transition: border-color .15s ease;
     }
     .row { display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; }
     .btnbar { display:flex; gap:0.5rem; flex-wrap:wrap; }
@@ -34,12 +33,6 @@
     .section-title { margin:0.5rem 0; font-weight:700; color:#cbd5e1; }
     .checkbox { display:flex; align-items:center; gap:0.5rem; color:#e5e7eb; }
     .divider { border-top:1px dashed var(--border); margin:0.75rem 0; }
-
-    /* Validation styles */
-    .error { border-color: var(--err) !important; }
-    .err-msg { color:#fca5a5; font-size:0.82rem; min-height:1em; }
-    .form-alert { color:#fde68a; background:#1f2937; border-left:4px solid var(--warn); padding:0.5rem 0.75rem; border-radius:6px; margin:0.5rem 0 0; display:none; }
-    .form-alert.show { display:block; }
   </style>
 </head>
 <body>
@@ -62,23 +55,18 @@
         </label>
         <label>Static IPv4 address
           <input id="ipAddress" type="text" value="10.184.69.101" />
-          <small id="err-ipAddress" class="err-msg"></small>
         </label>
         <label>Default gateway
           <input id="gateway" type="text" value="10.184.69.1" />
-          <small id="err-gateway" class="err-msg"></small>
         </label>
         <label>Prefix length (CIDR)
           <input id="prefix" type="text" value="24" />
-          <small id="err-prefix" class="err-msg"></small>
         </label>
         <label>VLAN ID (applied to adapters named <code>Integrated*</code>)
           <input id="vlanId" type="text" value="900" />
-          <small id="err-vlanId" class="err-msg"></small>
         </label>
-        <label>DNS servers (comma‑separated IPv4)
+        <label>DNS servers (comma‑separated)
           <input id="dnsServers" type="text" value="10.110.30.216,10.110.93.254" />
-          <small id="err-dnsServers" class="err-msg"></small>
         </label>
       </div>
 
@@ -122,9 +110,8 @@
 
       <p class="section-title">Time / NTP</p>
       <div class="grid2">
-        <label>NTP peers (comma‑separated IPv4)
+        <label>NTP peers (comma‑separated)
           <input id="ntpPeers" type="text" value="10.110.30.156,10.110.90.223" />
-          <small id="err-ntpPeers" class="err-msg"></small>
         </label>
       </div>
       <div class="row">
@@ -185,8 +172,6 @@
         <label class="checkbox"><input id="toggleArcUseProxy" type="checkbox" checked /> Include proxy args in Arc init</label>
       </div>
 
-      <div id="formAlert" class="form-alert">Fix the highlighted fields to enable Copy/Download.</div>
-
       <div class="btnbar" style="margin-top:0.75rem">
         <button class="primary" id="btnPreview">Preview</button>
         <button id="btnCopy" disabled>Copy</button>
@@ -215,95 +200,6 @@
   const on = id => g(id).checked;
 
   function lines(arr){ return arr.filter(l => l !== null && l !== undefined).join("\n"); }
-
-  // --- IPv4 Validation helpers ---
-  const ipv4Re = /^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)$/;
-  const isIPv4 = s => ipv4Re.test(s);
-
-  function setError(id, msg) {
-    g(id).classList.add('error');
-    const e = g('err-' + id);
-    if (e) e.textContent = msg || '';
-  }
-  function clearError(id) {
-    g(id).classList.remove('error');
-    const e = g('err-' + id);
-    if (e) e.textContent = '';
-  }
-
-  function validateIPv4Field(id, required = true) {
-    const v = val(id);
-    if (!v && !required) { clearError(id); return true; }
-    if (!v) { setError(id, 'Required'); return false; }
-    if (!isIPv4(v)) { setError(id, 'Enter a valid IPv4 address (e.g., 10.0.0.1)'); return false; }
-    clearError(id); return true;
-  }
-
-  function validateIPv4CsvField(id, required = true) {
-    const text = val(id);
-    const items = csv(text);
-    if (items.length === 0) {
-      if (required) { setError(id, 'Provide at least one IPv4 address'); return false; }
-      clearError(id); return true;
-    }
-    const bad = items.filter(x => !isIPv4(x));
-    if (bad.length) {
-      setError(id, 'Invalid IPv4: ' + bad.join(', '));
-      return false;
-    }
-    clearError(id); return true;
-  }
-
-  function validateNumberInRange(id, min, max, required = true) {
-    const v = val(id);
-    if (!v && !required) { clearError(id); return true; }
-    if (!/^\d+$/.test(v)) { setError(id, `Enter a number ${min}-${max}`); return false; }
-    const n = Number(v);
-    if (n < min || n > max) { setError(id, `Enter a number ${min}-${max}`); return false; }
-    clearError(id); return true;
-  }
-
-  function validateAll() {
-    let ok = true;
-
-    // Conditional checks based on toggles
-    if (on('toggleSetStatic')) {
-      ok = validateIPv4Field('ipAddress', true) && ok;
-      ok = validateIPv4Field('gateway', true) && ok;
-      ok = validateNumberInRange('prefix', 0, 32, true) && ok;
-    } else {
-      clearError('ipAddress'); clearError('gateway'); clearError('prefix');
-    }
-
-    // VLAN is independent but often used; keep it valid if toggled
-    if (on('toggleVlan')) {
-      ok = validateNumberInRange('vlanId', 1, 4094, true) && ok;
-    } else {
-      clearError('vlanId');
-    }
-
-    if (on('toggleDns')) {
-      ok = validateIPv4CsvField('dnsServers', true) && ok;
-    } else {
-      clearError('dnsServers');
-    }
-
-    if (on('toggleNtp')) {
-      // Per request: enforce IPv4 for NTP peers
-      ok = validateIPv4CsvField('ntpPeers', true) && ok;
-    } else {
-      clearError('ntpPeers');
-    }
-
-    // Show/hide form alert
-    g('formAlert').classList.toggle('show', !ok);
-
-    // Buttons state
-    g('btnCopy').disabled = !ok;
-    g('btnDownload').disabled = !ok;
-
-    return ok;
-  }
 
   function buildScript() {
     // Gather values
@@ -378,6 +274,7 @@
       net.push(`Get-NetAdapter -Name Integrated* | Set-NetAdapter -VlanID ${psq(vlanId)} -Confirm:$false`);
     }
     if (tgDns) {
+      // join DNS servers as comma separated literal (no quotes around commas)
       net.push(`Set-DnsClientServerAddress -InterfaceAlias ${psq(ifaceAlias)} -ServerAddresses ${dnsList.join(",")}`);
     }
 
@@ -423,6 +320,7 @@
     const proxyBlock = [];
     if (tgDownloadModule) {
       const modUrl = `https://www.powershellgallery.com/api/v2/package/WinInetProxy/0.1.0`;
+      // If a proxy is provided, include -Proxy on Invoke-WebRequest
       const proxyArg = proxy ? ` -Proxy ${psq(proxy)}` : "";
       proxyBlock.push(
         `Invoke-WebRequest -Uri ${psq(modUrl)} -OutFile C:\\WinInetProxy.zip${proxyArg}`,
@@ -465,12 +363,14 @@
 
   function updatePreview() {
     const script = buildScript();
-    g('preview').textContent = script;
-    validateAll(); // sets buttons + inline messages
+    const preview = g('preview');
+    preview.textContent = script;
+    const disabled = script.trim().length < 10;
+    g('btnCopy').disabled = disabled;
+    g('btnDownload').disabled = disabled;
   }
 
   function downloadPs1() {
-    if (!validateAll()) return;
     const content = CRLF(buildScript());
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -484,7 +384,6 @@
   }
 
   async function copyToClipboard() {
-    if (!validateAll()) return;
     await navigator.clipboard.writeText(buildScript());
     const btn = g("btnCopy");
     const prev = btn.textContent;
@@ -496,10 +395,7 @@
   g('btnPreview').addEventListener('click', updatePreview);
   g('btnDownload').addEventListener('click', downloadPs1);
   g('btnCopy').addEventListener('click', copyToClipboard);
-
-  // Live validation on inputs and toggles
   document.querySelectorAll('input').forEach(el => el.addEventListener('input', updatePreview));
-  document.querySelectorAll('input[type="checkbox"]').forEach(el => el.addEventListener('change', updatePreview));
 
   // Initial render
   updatePreview();
